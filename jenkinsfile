@@ -1,0 +1,28 @@
+node('built-in')
+{
+    stage('cont download')
+    {
+        git 'https://github.com/intelliqittrainings/maven.git'
+    }
+     stage('cont build')
+    {
+        sh 'mvn package'
+    }
+     stage('cont deploy')
+    {
+        deploy adapters: [tomcat9(credentialsId: 'jenkins-cred', path: '', url: 'http://172.31.27.91:8080')], contextPath: 'testapp', war: '**/*.war'
+    }
+    stage('cont testing')
+    {
+        git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+        sh 'java -jar /var/lib/jenkins/workspace/scriptedpipeline1/testing.jar '
+    }
+    stage('cont delivery')
+    {
+        input message: 'Need approval from DM!', submitter: 'srinivas'
+        deploy adapters: [tomcat9(credentialsId: 'jenkins-cred', path: '', url: 'http://172.31.21.232:8080')], contextPath: 'prodapp', war: '**/*.war'
+    }
+}
+ 
+
+
